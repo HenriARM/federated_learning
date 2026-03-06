@@ -1,0 +1,16 @@
+name: federated_learning
+channels:
+  - pytorch
+  - conda-forge
+dependencies:
+  - python=3.11
+  - openslide-python
+  - pillow
+  - numpy
+  - tqdm
+  - pyyaml
+  - matplotlib
+  - scikit-learn
+  - pytorch
+  - torchvision
+  - albumentations
