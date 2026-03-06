@@ -1,0 +1,48 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Shared settings
+# ─────────────────────────────────────────────────────────────────────────────
+data_root: "data/EBHI-SEG"
+output_dir: "outputs"
+
+seed: 42
+device: "auto"           # auto | cpu | cuda | mps
+
+image_size: 224          # spatial resolution fed to the model
+num_workers: 0           # DataLoader workers (0 = main process, safe on macOS)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Model
+# ─────────────────────────────────────────────────────────────────────────────
+base_channels: 32        # UNet width multiplier  (32 ≈ 1.9 M params)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Loss
+# ─────────────────────────────────────────────────────────────────────────────
+bce_weight: 0.5          # BceDiceLoss: bce_weight * BCE + (1-bce_weight) * Dice
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Dataset splits
+# ─────────────────────────────────────────────────────────────────────────────
+val_ratio: 0.15
+test_ratio: 0.15
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Centralised training
+# ─────────────────────────────────────────────────────────────────────────────
+batch_size: 16
+learning_rate: 0.001
+weight_decay: 0.0001
+epochs: 50
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Federated Learning  (FedAvg simulation on one machine)
+# ─────────────────────────────────────────────────────────────────────────────
+fl_rounds: 20            # number of communication rounds
+local_epochs: 3          # local SGD epochs per round per client
+client_fraction: 1.0     # fraction of clients selected per round (1.0 = all)
+
+# Partitioning strategy for distributing training data across virtual hospitals:
+#   by_class – non-IID: each hospital holds one tissue-type class (6 hospitals)
+#   random   – IID:     data shuffled randomly across n_clients hospitals
+partition_strategy: "by_class"
+n_clients: 6             # used only when partition_strategy = random
