@@ -21,6 +21,7 @@ from src.utils import (
     save_history,
     set_seed,
 )
+from src.visualize import run_and_plot
 
 
 # ---------------------------------------------------------------------------
@@ -215,6 +216,17 @@ def run_centralized_training(config: dict) -> tuple[dict, dict]:
     test_m = evaluate(model, test_loader, criterion, device)
     print(
         f"Test → loss={test_m['loss']:.4f}  dice={test_m['dice']:.4f}  iou={test_m['iou']:.4f}"
+    )
+
+    # ---- Inference visualisation on the held-out test set ----
+    run_and_plot(
+        model=model,
+        test_ds=test_ds,
+        device=device,
+        output_path=output_dir / "inference.png",
+        n_samples=config.get("inference_samples", 32),
+        seed=config.get("seed", 42),
+        title="Centralized – Test Set Inference",
     )
 
     return history, test_m
