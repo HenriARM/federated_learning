@@ -13,7 +13,8 @@ num_workers: 0           # DataLoader workers (0 = main process, safe on macOS)
 # ─────────────────────────────────────────────────────────────────────────────
 # Model
 # ─────────────────────────────────────────────────────────────────────────────
-base_channels: 32        # UNet width multiplier  (32 ≈ 1.9 M params)
+model_type: "unet"       # unet | deeplab | fcn
+base_channels: 32        # UNet width multiplier  (32 ≈ 1.9 M params, ignored for DeepLab/FCN)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Loss
@@ -35,8 +36,9 @@ weight_decay: 0.0001
 epochs: 30
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Federated Learning  (FedAvg simulation on one machine)
+# Federated Learning  (simulation on one machine)
 # ─────────────────────────────────────────────────────────────────────────────
+fl_algorithm: "fedavg"   # fedavg | fedprox | fedoptimizer
 fl_rounds: 20            # number of communication rounds
 local_epochs: 3          # local SGD epochs per round per client
 client_fraction: 1.0     # fraction of clients selected per round (1.0 = all)
