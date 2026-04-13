@@ -29,7 +29,7 @@ from federated.client import FederatedClient
 from federated.server import FederatedServer
 from src.dataset import CLASSES, EBHISEGDataset, get_transforms, split_samples
 from src.metrics import BceDiceLoss
-from src.model import UNet
+from src.model import create_model
 from src.utils import get_device, plot_history, save_checkpoint, save_history, set_seed
 from src.visualize import run_and_plot
 
@@ -163,10 +163,11 @@ def run_federated_training(config: dict) -> tuple[list[dict], dict]:
     )
 
     # ---- Global model & server ----
-    global_model = UNet(
+    global_model = create_model(
+        model_type=config.get("model_type", "unet"),
         in_channels=3,
-        base_channels=config.get("base_channels", 32),
         n_classes=1,
+        base_channels=config.get("base_channels", 32),
     )
     criterion = BceDiceLoss(bce_weight=config.get("bce_weight", 0.5))
     server = FederatedServer(global_model)

@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 from src.dataset import build_datasets
 from src.metrics import BceDiceLoss, dice_coefficient, iou_score
-from src.model import UNet
+from src.model import create_model
 from src.utils import (
     get_device,
     load_checkpoint,
@@ -152,13 +152,15 @@ def run_centralized_training(config: dict) -> tuple[dict, dict]:
     )
 
     # ---- Model ----
-    model = UNet(
+    model = create_model(
+        model_type=config.get("model_type", "unet"),
         in_channels=3,
-        base_channels=config.get("base_channels", 32),
         n_classes=1,
+        base_channels=config.get("base_channels", 32),
     ).to(device)
     n_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    print(f"  UNet parameters: {n_params:,}")
+    model_name = config.get("model_type", "unet").upper()
+    print(f"  {model_name} parameters: {n_params:,}")
 
     # ---- Optimizer / scheduler / loss ----
     optimizer = torch.optim.Adam(

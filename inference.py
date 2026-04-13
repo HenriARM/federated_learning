@@ -43,7 +43,7 @@ from PIL import Image
 
 from src.dataset import EBHISEGDataset, build_datasets, get_transforms
 from src.metrics import dice_coefficient, iou_score
-from src.model import UNet
+from src.model import create_model
 from src.utils import get_device, load_checkpoint, set_seed
 
 matplotlib.use("Agg")   # headless-safe; switch to "TkAgg" / "MacOSX" for interactive
@@ -273,10 +273,11 @@ def main() -> None:
     )
 
     # ---- Model ----
-    model = UNet(
+    model = create_model(
+        model_type=config.get("model_type", "unet"),
         in_channels=3,
-        base_channels=config.get("base_channels", 32),
         n_classes=1,
+        base_channels=config.get("base_channels", 32),
     ).to(device)
     epoch, metrics = load_checkpoint(checkpoint, model)
     print(f"Loaded checkpoint from {checkpoint}  (epoch {epoch}, "
