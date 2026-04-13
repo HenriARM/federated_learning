@@ -69,9 +69,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--base_channels", type=int, default=None)
     parser.add_argument("--device", default=None, help="cpu | cuda | mps | auto")
     parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--model_type", choices=["unet", "deeplab", "fcn"], default=None, help="Model architecture (default: unet).")
     # Federated-specific
     parser.add_argument("--fl_rounds", type=int, default=None)
     parser.add_argument("--local_epochs", type=int, default=None)
+    parser.add_argument("--fl_algorithm", choices=["fedavg", "fedprox", "fedoptimizer"], default=None, help="Federated learning algorithm (default: fedavg).")
     parser.add_argument(
         "--partition",
         choices=["by_class", "random"],
