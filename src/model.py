@@ -34,6 +34,44 @@ class _DeepLabOutputWrapper(nn.Module):
 
 
 # ---------------------------------------------------------------------------
+# Utility: Replace BatchNorm with GroupNorm for small batch sizes
+# ---------------------------------------------------------------------------
+
+def _replace_batchnorm_with_groupnorm(model, num_groups=32):
+    """
+    Replace all BatchNorm layers with GroupNorm for better stability with small batches.
+    This is important for federated learning where some clients have very few samples.
+    """
+    for name, module in model.named_modules():
+        if isinstance(module, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d)):
+            # Determine the number of channels
+            if isinstance(module, nn.BatchNorm1d):
+                num_channels = module.num_features
+            elif isinstance(module, nn.BatchNorm2d):
+                num_channels = module.num_features
+            else:  # BatchNorm3d
+                num_channels = module.num_features
+            
+            # Create appropriate GroupNorm
+            if isinstance(module, nn.BatchNorm1d):
+                # For 1D, use LayerNorm instead
+                new_module = nn.LayerNorm(num_channels)
+            else:
+                new_module = nn.GroupNorm(
+                    min(num_groups, num_channels),  # Ensure num_groups <= num_channels
+                    num_channels,
+                    eps=module.eps,
+                    affine=module.affine
+                )
+            
+            # Replace BatchNorm with GroupNorm
+            parent_module = model
+            for attr_name in name.split('.')[:-1]:
+                parent_module = getattr(parent_module, attr_name)
+            setattr(parent_module, name.split('.')[-1], new_module)
+
+
+# ---------------------------------------------------------------------------
 # Model factory
 # ---------------------------------------------------------------------------
 
@@ -86,6 +124,9 @@ def create_model(
                 in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False
             )
         
+        # Replace BatchNorm with GroupNorm for federated learning (handles small batches)
+        _replace_batchnorm_with_groupnorm(model, num_groups=32)
+        
         # Wrap DeepLab to extract main output (it returns OrderedDict)
         return _DeepLabOutputWrapper(model)
     
@@ -102,6 +143,9 @@ def create_model(
             model.backbone.conv1 = nn.Conv2d(
                 in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False
             )
+        
+        # Replace BatchNorm with GroupNorm for federated learning (handles small batches)
+        _replace_batchnorm_with_groupnorm(model, num_groups=32)
         
         # Wrap FCN to extract main output (it returns OrderedDict)
         return _DeepLabOutputWrapper(model)
