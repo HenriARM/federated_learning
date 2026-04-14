@@ -35,6 +35,9 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from datetime import datetime
+import sys
+import logging
 
 import yaml
 
@@ -42,6 +45,56 @@ import yaml
 def load_config(path: str) -> dict:
     with open(path) as f:
         return yaml.safe_load(f)
+
+
+def setup_logging(output_dir: str, mode: str) -> Path:
+    """Setup file logging for experiment output.
+    
+    Creates a timestamped log file in output_dir and configures logging
+    to write all prints to both console and file.
+    
+    Args:
+        output_dir: Directory where logs should be saved
+        mode: 'centralized' or 'federated'
+    
+    Returns:
+        Path to the log file
+    """
+    output_path = Path(output_dir)
+    output_path.mkdir(parents=True, exist_ok=True)
+    
+    # Create timestamped log file
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    log_file = output_path / f'{mode}_{timestamp}.log'
+    
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(sys.stdout)
+        ],
+        force=True  # Override any existing config
+    )
+    
+    # Also redirect print() to logging (for convenience)
+    class PrintToLog:
+        def __init__(self, log_file):
+            self.log_file = log_file
+            self.terminal = sys.stdout
+        
+        def write(self, message):
+            with open(self.log_file, 'a') as f:
+                f.write(message)
+            self.terminal.write(message)
+        
+        def flush(self):
+            pass
+    
+    sys.stdout = PrintToLog(log_file)
+    
+    return log_file
 
 
 def parse_args() -> argparse.Namespace:
@@ -96,8 +149,14 @@ def main() -> None:
     overrides = {k: v for k, v in vars(args).items() if v is not None and k not in ("config", "mode")}
     config.update(overrides)
 
+    # Setup logging BEFORE any prints
+    log_file = setup_logging(config['output_dir'], args.mode)
+
     print(f"Mode  : {args.mode}")
     print(f"Config: {args.config}")
+    print(f"Log   : {log_file}")
+    for k, v in sorted(config.items()):
+        print(f"  {k}: {v}")
     for k, v in sorted(config.items()):
         print(f"  {k}: {v}")
     print()
@@ -110,6 +169,7 @@ def main() -> None:
         print(f"Test IoU  : {test_metrics['iou']:.4f}")
         print(f"Test Loss : {test_metrics['loss']:.4f}")
         print(f"Results saved to: {Path(config['output_dir']) / 'centralized'}")
+        print(f"Log saved to: {log_file}")
 
     elif args.mode == "federated":
         from federated.fl_train import run_federated_training
@@ -119,6 +179,7 @@ def main() -> None:
         print(f"Test IoU  : {test_metrics['iou']:.4f}")
         print(f"Test Loss : {test_metrics['loss']:.4f}")
         print(f"Results saved to: {Path(config['output_dir']) / 'federated'}")
+        print(f"Log saved to: {log_file}")
 
 
 if __name__ == "__main__":
