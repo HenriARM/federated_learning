@@ -7,9 +7,30 @@ Supports:
   - FCN: Classic fully-convolutional networks
 """
 
+import torch
 import torch.nn as nn
 
 from src.models.unet import UNet
+
+
+# ---------------------------------------------------------------------------
+# Wrapper for models that return OrderedDict outputs
+# ---------------------------------------------------------------------------
+
+class _DeepLabOutputWrapper(nn.Module):
+    """
+    Wrapper to extract main output from DeepLab's OrderedDict.
+    DeepLab returns {'out': tensor, 'aux': tensor}, but we only need 'out'.
+    """
+    def __init__(self, model):
+        super().__init__()
+        self.model = model
+    
+    def forward(self, x):
+        outputs = self.model(x)
+        if isinstance(outputs, dict):
+            return outputs['out']
+        return outputs
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +86,8 @@ def create_model(
                 in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False
             )
         
-        return model
+        # Wrap DeepLab to extract main output (it returns OrderedDict)
+        return _DeepLabOutputWrapper(model)
     
     elif model_type == "fcn":
         # FCN (Fully Convolutional Network) with ResNet50 backbone
@@ -81,7 +103,8 @@ def create_model(
                 in_channels, 64, kernel_size=7, stride=2, padding=3, bias=False
             )
         
-        return model
+        # Wrap FCN to extract main output (it returns OrderedDict)
+        return _DeepLabOutputWrapper(model)
     
     else:
         raise ValueError(
