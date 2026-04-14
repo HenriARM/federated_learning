@@ -50,7 +50,7 @@ Email: Mohammadreza.Azimi@rsu.lv}
 Riga Stradins University\\
 in Riga\\
 Ratsupites iela 5 Riga, LV-1067, Latvija\\
-Email: Henrik.Gabrielyan@rsu.lv}
+Email: hengab@rsu.lv}
 }
 
 % conference papers do not typically use \thanks and this command
@@ -235,20 +235,16 @@ Convergence smoothness was quantified as the mean absolute change in Dice coeffi
 
 FedOptimizer's superior smoothness stems from its momentum-based aggregation mechanism, which dampens within-round fluctuations. However, this smoothing effect does not translate to improved accuracy under Non-IID conditions, suggesting that algorithmic stability may not address the fundamental challenge of client heterogeneity in federated learning.
 
-Figure~\ref{fig:convergence_curves} illustrates the convergence behavior of the three federated learning algorithms under Non-IID data distribution, the most challenging scenario. The plots demonstrate the oscillatory patterns discussed above, with visible performance fluctuations between rounds 8-15 before stabilization. FedOptimizer exhibits the smoothest trajectory with minimal variance, while FedAvg shows larger between-round swings but achieves superior final accuracy.
-
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.75\hsize]{fl_curves.pdf}
+\includegraphics[width=0.75\hsize]{fl_curves.png}
 \caption{Convergence curves comparing FedAvg, FedProx, and FedOptimizer under Non-IID (by-class) data distribution. From top: Dice coefficient, IoU, and Loss trajectories across 20 federated communication rounds. Note the oscillatory behavior in rounds 8-15 and improved stability in FedOptimizer despite lower final accuracy.}
 \label{fig:convergence_curves}
 \end{figure}
 
-Figure~\ref{fig:segmentation_examples} presents qualitative results showing histopathology tissue segmentation outputs from the federated UNet model on representative test samples. The model successfully segments various tissue classes including normal epithelium, adenocarcinoma, and polyp regions, demonstrating the feasibility of federated learning for histopathological image analysis.
-
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\hsize]{segmentation_examples.pdf}
+\includegraphics[width=\hsize]{segmentation_examples.png}
 \caption{Representative segmentation results from federated UNet model on EBHI-Seg test samples. Columns show: (left) original hematoxylin-eosin stained images, (middle) ground truth annotations, (right) model predictions. The federated model achieves pixel-level accuracy comparable to centralized training, validating the federated learning approach for histopathology tasks.}
 \label{fig:segmentation_examples}
 \end{figure}
