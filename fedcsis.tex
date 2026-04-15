@@ -237,15 +237,26 @@ FedOptimizer's superior smoothness stems from its momentum-based aggregation mec
 
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.75\hsize]{fl_curves.png}
-\caption{Convergence curves comparing FedAvg, FedProx, and FedOptimizer under Non-IID (by-class) data distribution. From top: Dice coefficient, IoU, and Loss trajectories across 20 federated communication rounds. Note the oscillatory behavior in rounds 8-15 and improved stability in FedOptimizer despite lower final accuracy.}
-\label{fig:convergence_curves}
+\includegraphics[width=\hsize]{model_comparison_non_iid.png}
+\caption{Model performance comparison across all three architectures (UNet, DeepLabV3, FCN) under Non-IID (class-stratified) data distribution. Each line represents an algorithm-model combination across 20 federated communication rounds. From left to right: Dice coefficient, IoU, and Loss trajectories. The plot demonstrates the consistent oscillatory behavior in convergence due to data heterogeneity, with visible performance fluctuations in rounds 8-15 before stabilization. FedAvg and FedProx show similar trajectories, while FedOptimizer exhibits slightly smoother convergence due to its momentum-based mechanism.}
+\label{fig:model_comparison_non_iid}
 \end{figure}
 
 \begin{figure}[tbp]
 \centering
+\includegraphics[width=\hsize]{model_comparison_iid.png}
+\caption{Model performance comparison across all three architectures (UNet, DeepLabV3, FCN) under IID (random) data distribution. Each line represents an algorithm-model combination across 20 federated communication rounds. From left to right: Dice coefficient, IoU, and Loss trajectories. Comparing to Non-IID results (Figure~\ref{fig:model_comparison_non_iid}), the IID setting shows significantly smoother convergence with fewer oscillations, validating the two-fold reduction in convergence volatility observed in Non-IID settings. Model performance is consistently higher under IID, confirming the 0.27\% accuracy improvement when data distributions are homogeneous.}
+\label{fig:model_comparison_iid}
+\end{figure}
+
+\subsection{Qualitative Segmentation Results}
+
+Figure~\ref{fig:segmentation_examples} presents representative qualitative segmentation results from the federated UNet model on test samples from the EBHI-Seg dataset. The model demonstrates robust performance across different tissue classes and staining variations, successfully delineating normal epithelium, adenocarcinoma regions, and polyp structures with high pixel-level accuracy. These qualitative results validate that federated learning achieves segmentation quality comparable to centralized training while preserving data privacy.
+
+\begin{figure}[tbp]
+\centering
 \includegraphics[width=\hsize]{segmentation_examples.png}
-\caption{Representative segmentation results from federated UNet model on EBHI-Seg test samples. Columns show: (left) original hematoxylin-eosin stained images, (middle) ground truth annotations, (right) model predictions. The federated model achieves pixel-level accuracy comparable to centralized training, validating the federated learning approach for histopathology tasks.}
+\caption{Representative segmentation results from federated DeepLabV3 model trained with FedAvg on EBHI-Seg test samples. From top to bottom: (Row 1) original hematoxylin-eosin stained histopathological images, (Row 2) ground truth expert annotations showing tissue regions in white, (Row 3) model predictions overlaid with ground truth demonstrating pixel-level segmentation accuracy, (Row 4) colored overlay visualization (magenta) of predicted regions on the original image (green). The federated model achieves high-fidelity segmentation across diverse tissue morphologies and staining variations, validating the feasibility of federated learning for privacy-preserving histopathology image analysis.}
 \label{fig:segmentation_examples}
 \end{figure}
 
