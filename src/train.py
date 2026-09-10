@@ -49,7 +49,8 @@ def train_one_epoch(
         optimizer.zero_grad()
 
         if scaler is not None:
-            with torch.amp.autocast("cuda"):
+            print("Device type:", device.type)
+            with torch.amp.autocast(device.type):
                 logits = model(images)
                 loss = criterion(logits, masks)
             scaler.scale(loss).backward()

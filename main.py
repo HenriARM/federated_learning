@@ -157,8 +157,6 @@ def main() -> None:
     print(f"Log   : {log_file}")
     for k, v in sorted(config.items()):
         print(f"  {k}: {v}")
-    for k, v in sorted(config.items()):
-        print(f"  {k}: {v}")
     print()
 
     if args.mode == "centralized":
