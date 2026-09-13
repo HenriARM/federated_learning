@@ -112,6 +112,12 @@ def parse_args() -> argparse.Namespace:
         default="centralized",
         help="Training mode (default: centralized).",
     )
+    parser.add_argument(
+        "--task",
+        choices=["segmentation", "classification"],
+        default=None,
+        help="Task to train (default: segmentation).",
+    )
     # Convenience overrides matching config.yaml keys
     parser.add_argument("--data_root", default=None)
     parser.add_argument("--output_dir", default=None)
@@ -151,7 +157,9 @@ def main() -> None:
 
     # Setup logging BEFORE any prints
     log_file = setup_logging(config['output_dir'], args.mode)
+    task = config.get("task", "segmentation")
 
+    print(f"Task  : {task}")
     print(f"Mode  : {args.mode}")
     print(f"Config: {args.config}")
     print(f"Log   : {log_file}")
@@ -159,7 +167,29 @@ def main() -> None:
         print(f"  {k}: {v}")
     print()
 
-    if args.mode == "centralized":
+    if task == "classification" and args.mode == "centralized":
+        from src.classification_train import run_centralized_classification
+
+        _, test_metrics = run_centralized_classification(config)
+        print("\n=== Centralized Classification Complete ===")
+        print(f"Test Accuracy: {test_metrics['accuracy']:.4f}")
+        print(f"Test Macro F1: {test_metrics['f1_macro']:.4f}")
+        print(f"Test Loss    : {test_metrics['loss']:.4f}")
+        print(f"Results saved to: {Path(config['output_dir']) / 'centralized_classification'}")
+        print(f"Log saved to: {log_file}")
+
+    elif task == "classification" and args.mode == "federated":
+        from federated.classification_fl import run_federated_classification
+
+        _, test_metrics = run_federated_classification(config)
+        print("\n=== Federated Classification Complete ===")
+        print(f"Test Accuracy: {test_metrics['accuracy']:.4f}")
+        print(f"Test Macro F1: {test_metrics['f1_macro']:.4f}")
+        print(f"Test Loss    : {test_metrics['loss']:.4f}")
+        print(f"Results saved to: {Path(config['output_dir']) / 'federated_classification'}")
+        print(f"Log saved to: {log_file}")
+
+    elif args.mode == "centralized":
         from src.train import run_centralized_training
         history, test_metrics = run_centralized_training(config)
         print("\n=== Centralized Training Complete ===")

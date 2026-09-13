@@ -90,3 +90,15 @@ python inference.py --checkpoint outputs/federated/best_model.pt --n_samples 32
 - FedAvg: [McMahan et al., 2017](https://arxiv.org/abs/1602.05629)
 - FedProx: [Li et al., 2020](https://arxiv.org/abs/1907.02745)
 - FedOptimizer: [Reddi et al., 2020](https://arxiv.org/abs/2003.00295)
+
+
+
+python main.py --task classification --mode centralized \
+  --model_type deeplab --device auto
+
+  python main.py --task classification --mode federated \
+  --model_type deeplab \
+  --partition by_class \
+  --fl_algorithm fedavg \
+  --fl_rounds 20 \
+  --device auto
