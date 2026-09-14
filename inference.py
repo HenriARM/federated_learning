@@ -29,6 +29,9 @@ python inference.py --n_samples 32 --cols 4 2>&1
 
 from __future__ import annotations
 
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import argparse
 import random
 from pathlib import Path

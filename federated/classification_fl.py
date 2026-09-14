@@ -88,8 +88,9 @@ def _local_update(global_model, dataset, config, device):
         shuffle=True,
         num_workers=config.get("num_workers", 0),
     )
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        trainable_params,
         lr=config.get("learning_rate", 1e-3),
         weight_decay=config.get("weight_decay", 1e-4),
     )
@@ -135,7 +136,11 @@ def run_federated_classification(config: dict) -> tuple[list[dict], dict]:
     val_loader = DataLoader(val_ds, batch_size=config.get("batch_size", 16))
     test_loader = DataLoader(test_ds, batch_size=config.get("batch_size", 16))
     model = create_classification_model(
-        config.get("model_type", "unet"), len(CLASSES), config.get("base_channels", 32)
+        config.get("model_type", "unet"),
+        len(CLASSES),
+        base_channels=config.get("base_channels", 32),
+        pretrained=config.get("pretrained", True),
+        freeze_layers=config.get("freeze_layers", None),
     )
     criterion = torch.nn.CrossEntropyLoss()
     history: list[dict] = []

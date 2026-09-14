@@ -33,6 +33,10 @@ Non-IID = the opposite — each client's data has a different distribution. One 
 
 from __future__ import annotations
 
+import os
+# Prevent OpenMP crash when multiple libraries (torch, albumentations/opencv) load duplicate runtimes on macOS
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+
 import argparse
 from pathlib import Path
 from datetime import datetime
@@ -129,6 +133,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default=None, help="cpu | cuda | mps | auto")
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--model_type", choices=["unet", "deeplab", "fcn"], default=None, help="Model architecture (default: unet).")
+    parser.add_argument("--pretrained", action=argparse.BooleanOptionalAction, default=None, help="Use pre-trained weights for transfer learning.")
+    parser.add_argument("--freeze_layers", choices=["none", "early", "backbone"], default=None, help="Layer freezing strategy (default: none).")
     # Federated-specific
     parser.add_argument("--fl_rounds", type=int, default=None)
     parser.add_argument("--local_epochs", type=int, default=None)

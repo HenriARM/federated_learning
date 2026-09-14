@@ -61,10 +61,15 @@ def run_centralized_classification(config: dict) -> tuple[dict, dict]:
     test_loader = DataLoader(test_ds, batch_size=batch_size, num_workers=num_workers)
 
     model = create_classification_model(
-        config.get("model_type", "unet"), n_classes, config.get("base_channels", 32)
+        config.get("model_type", "unet"),
+        n_classes,
+        base_channels=config.get("base_channels", 32),
+        pretrained=config.get("pretrained", True),
+        freeze_layers=config.get("freeze_layers", None),
     ).to(device)
+    trainable_params = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.Adam(
-        model.parameters(),
+        trainable_params,
         lr=config.get("learning_rate", 1e-3),
         weight_decay=config.get("weight_decay", 1e-4),
     )
