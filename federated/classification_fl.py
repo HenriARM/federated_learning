@@ -79,9 +79,13 @@ def _evaluate(model, loader, criterion, device):
     }
 
 
-def _local_update(global_model, dataset, config, device):
+def _local_update(global_model, dataset, config, device, algorithm):
     model = copy.deepcopy(global_model).to(device)
     model.train()
+    global_parameters = {
+        name: parameter.detach().clone()
+        for name, parameter in global_model.named_parameters()
+    }
     loader = DataLoader(
         dataset,
         batch_size=config.get("batch_size", 16),
@@ -101,6 +105,13 @@ def _local_update(global_model, dataset, config, device):
             targets = targets.to(device, dtype=torch.long)
             optimizer.zero_grad()
             loss = criterion(model(images), targets)
+            if algorithm == "fedprox":
+                proximal_loss = sum(
+                    torch.sum((parameter - global_parameters[name]) ** 2)
+                    for name, parameter in model.named_parameters()
+                    if parameter.requires_grad
+                )
+                loss = loss + (config.get("mu", 0.01) / 2.0) * proximal_loss
             loss.backward()
             optimizer.step()
     return model.state_dict(), len(dataset)
@@ -122,11 +133,11 @@ def _fedavg(model, updates):
 
 
 def run_federated_classification(config: dict) -> tuple[list[dict], dict]:
-    """Run weighted FedAvg for the classification task."""
+    """Run weighted FedAvg or FedProx for the classification task."""
     algorithm = config.get("fl_algorithm", "fedavg")
-    if algorithm != "fedavg":
+    if algorithm not in {"fedavg", "fedprox"}:
         raise NotImplementedError(
-            f"Classification currently supports only fedavg, got '{algorithm}'."
+            f"Classification currently supports fedavg and fedprox, got '{algorithm}'."
         )
     set_seed(config.get("seed", 42))
     device = get_device(config.get("device", "auto"))
@@ -151,7 +162,10 @@ def run_federated_classification(config: dict) -> tuple[list[dict], dict]:
         selected_count = max(1, int(len(client_names) * config.get("client_fraction", 1.0)))
         selected = random.sample(client_names, selected_count)
         global_model = model.to(device)
-        updates = [_local_update(global_model, clients[name], config, device) for name in selected]
+        updates = [
+            _local_update(global_model, clients[name], config, device, algorithm)
+            for name in selected
+        ]
         _fedavg(global_model, updates)
         metrics = _evaluate(global_model, val_loader, criterion, device)
         history.append({"round": round_index, **metrics})

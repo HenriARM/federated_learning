@@ -138,6 +138,7 @@ def parse_args() -> argparse.Namespace:
     # Federated-specific
     parser.add_argument("--fl_rounds", type=int, default=None)
     parser.add_argument("--local_epochs", type=int, default=None)
+    parser.add_argument("--mu", type=float, default=None, help="FedProx proximal coefficient (default: 0.01).")
     parser.add_argument("--fl_algorithm", choices=["fedavg", "fedprox", "fedoptimizer"], default=None, help="Federated learning algorithm (default: fedavg).")
     parser.add_argument(
         "--partition",

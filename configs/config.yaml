@@ -41,6 +41,7 @@ epochs: 30
 # Federated Learning  (simulation on one machine)
 # ─────────────────────────────────────────────────────────────────────────────
 fl_algorithm: "fedavg"   # fedavg | fedprox | fedoptimizer
+mu: 0.01                  # FedProx proximal coefficient
 fl_rounds: 20            # number of communication rounds
 local_epochs: 3          # local SGD epochs per round per client
 client_fraction: 1.0     # fraction of clients selected per round (1.0 = all)
